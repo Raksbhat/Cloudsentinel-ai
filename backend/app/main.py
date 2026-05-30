@@ -2,8 +2,55 @@ import json
 import boto3
 from datetime import datetime, timezone
 
-def get_findings():
-    findings = []
+MOCK_FINDINGS = [
+    {
+        "id": "mock-001",
+        "title": "IAM User Performing Unusual API Activity",
+        "severity": 8.0,
+        "type": "UnauthorizedAccess:IAMUser/MaliciousIPCaller",
+        "source": "GuardDuty",
+        "timestamp": "2026-05-30T06:00:00Z",
+        "description": "An IAM user is making API calls from a known malicious IP address."
+    },
+    {
+        "id": "mock-002",
+        "title": "EC2 Instance Communicating with C2 Server",
+        "severity": 9.0,
+        "type": "Backdoor:EC2/C2Activity.B",
+        "source": "GuardDuty",
+        "timestamp": "2026-05-30T07:00:00Z",
+        "description": "An EC2 instance is communicating with a command and control server."
+    },
+    {
+        "id": "mock-003",
+        "title": "S3 Bucket Made Public",
+        "severity": 7.0,
+        "type": "Policy:S3/BucketPublicAccessGranted",
+        "source": "CloudTrail",
+        "timestamp": "2026-05-30T08:00:00Z",
+        "description": "An S3 bucket ACL was changed to allow public access."
+    },
+    {
+        "id": "mock-004",
+        "title": "Root Account Console Login",
+        "severity": 6.0,
+        "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess",
+        "source": "CloudTrail",
+        "timestamp": "2026-05-30T09:00:00Z",
+        "description": "Root account was used to log into the AWS console."
+    },
+    {
+        "id": "mock-005",
+        "title": "CloudTrail Logging Disabled",
+        "severity": 9.5,
+        "type": "Stealth:IAMUser/CloudTrailLoggingDisabled",
+        "source": "GuardDuty",
+        "timestamp": "2026-05-30T09:30:00Z",
+        "description": "CloudTrail logging was disabled — possible attacker evasion."
+    }
+]
+
+def get_guardduty_findings():
     try:
         gd = boto3.client("guardduty", region_name="eu-north-1")
         detectors = gd.list_detectors()
@@ -15,42 +62,48 @@ def get_findings():
                     DetectorId=detector_id,
                     FindingIds=response["FindingIds"]
                 )
-                for f in details["Findings"]:
-                    findings.append({
-                        "id": f["Id"],
-                        "title": f["Title"],
-                        "severity": f["Severity"],
-                        "type": f["Type"],
-                        "source": "GuardDuty"
-                    })
-    except Exception as e:
-        findings.append({
-            "id": "error",
-            "title": str(e),
-            "severity": 0,
-            "type": "ERROR",
-            "source": "System"
-        })
-    return findings
+                return [{
+                    "id": f["Id"],
+                    "title": f["Title"],
+                    "severity": f["Severity"],
+                    "type": f["Type"],
+                    "source": "GuardDuty",
+                    "timestamp": f["UpdatedAt"],
+                    "description": f.get("Description", "")
+                } for f in details["Findings"]]
+    except Exception:
+        pass
+    return None
 
 def handler(event, context):
     path = event.get("rawPath", "/")
-    
+
     headers = {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
     }
-    
+
     if path == "/" or path == "":
         body = {"status": "CloudSentinel AI is running", "version": "1.0.0"}
+
     elif path == "/health":
-        body = {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
+        body = {
+            "status": "healthy",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
     elif path == "/findings":
-        findings = get_findings()
-        body = {"findings": findings, "total": len(findings)}
+        real_findings = get_guardduty_findings()
+        findings = real_findings if real_findings else MOCK_FINDINGS
+        body = {
+            "findings": findings,
+            "total": len(findings),
+            "source": "live" if real_findings else "demo"
+        }
+
     else:
         body = {"error": "Not found"}
-    
+
     return {
         "statusCode": 200,
         "headers": headers,
