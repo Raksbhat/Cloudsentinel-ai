@@ -5,35 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CloudSentinel AI</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0a0e1a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
-  .header { background: #0f1628; border-bottom: 1px solid #1e3a5f; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-  .logo { font-size: 20px; font-weight: 700; color: #38bdf8; }
-  .logo span { color: #f43f5e; }
-  .status-badge { background: #052e16; color: #4ade80; border: 1px solid #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-  .container { padding: 32px; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card { background: #0f1628; border: 1px solid #1e3a5f; border-radius: 8px; padding: 20px; }
-  .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-  .stat-value { font-size: 32px; font-weight: 700; margin-top: 8px; }
-  .critical { color: #f43f5e; }
-  .high { color: #fb923c; }
-  .medium { color: #fbbf24; }
-  .total { color: #38bdf8; }
-  .section-title { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-  .finding-card { background: #0f1628; border: 1px solid #1e3a5f; border-radius: 8px; padding: 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; }
-  .finding-card:hover { border-color: #38bdf8; transition: 0.2s; }
-  .severity-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .sev-critical { background: #450a0a; color: #f43f5e; border: 1px solid #f43f5e; }
-  .sev-high { background: #431407; color: #fb923c; border: 1px solid #fb923c; }
-  .sev-medium { background: #422006; color: #fbbf24; border: 1px solid #fbbf24; }
-  .finding-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .finding-type { font-size: 12px; color: #38bdf8; font-family: monospace; }
-  .finding-desc { font-size: 13px; color: #94a3b8; margin-top: 8px; }
-  .finding-meta { font-size: 11px; color: #475569; margin-top: 8px; }
-  .source-tag { display: inline-block; background: #1e293b; padding: 2px 8px; border-radius: 3px; margin-right: 8px; }
-  .loading { text-align: center; color: #38bdf8; padding: 60px; font-size: 18px; }
-  .demo-banner { background: #1e1a05; border: 1px solid #854d0e; border-radius: 8px; padding: 12px 20px; margin-bottom: 24px; color: #fbbf24; font-size: 13px; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e1a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+.header { background: #0f1628; border-bottom: 1px solid #1e3a5f; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 20px; font-weight: 700; color: #38bdf8; }
+.logo span { color: #f43f5e; }
+.status-badge { background: #052e16; color: #4ade80; border: 1px solid #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+.container { padding: 32px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: #0f1628; border: 1px solid #1e3a5f; border-radius: 8px; padding: 20px; }
+.stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-size: 32px; font-weight: 700; margin-top: 8px; }
+.critical { color: #f43f5e; }
+.high { color: #fb923c; }
+.medium { color: #fbbf24; }
+.total { color: #38bdf8; }
+.section-title { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.finding-card { background: #0f1628; border: 1px solid #1e3a5f; border-radius: 8px; padding: 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; }
+.finding-card:hover { border-color: #38bdf8; transition: 0.2s; }
+.severity-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.sev-critical { background: #450a0a; color: #f43f5e; border: 1px solid #f43f5e; }
+.sev-high { background: #431407; color: #fb923c; border: 1px solid #fb923c; }
+.sev-medium { background: #422006; color: #fbbf24; border: 1px solid #fbbf24; }
+.finding-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.finding-type { font-size: 12px; color: #38bdf8; font-family: monospace; }
+.finding-desc { font-size: 13px; color: #94a3b8; margin-top: 8px; }
+.finding-meta { font-size: 11px; color: #475569; margin-top: 8px; }
+.source-tag { display: inline-block; background: #1e293b; padding: 2px 8px; border-radius: 3px; margin-right: 8px; }
+.loading { text-align: center; color: #38bdf8; padding: 60px; font-size: 18px; }
+.demo-banner { background: #1e1a05; border: 1px solid #854d0e; border-radius: 8px; padding: 12px 20px; margin-bottom: 24px; color: #fbbf24; font-size: 13px; }
+.ai-hint { margin-top:10px;color:#38bdf8;font-size:12px; }
 </style>
 </head>
 <body>
@@ -41,57 +42,104 @@
   <div class="logo">Cloud<span>Sentinel</span> AI</div>
   <div class="status-badge">● LIVE</div>
 </div>
+
 <div class="container">
   <div id="demo-banner"></div>
+
   <div class="stats">
     <div class="stat-card"><div class="stat-label">Total Findings</div><div class="stat-value total" id="total">-</div></div>
     <div class="stat-card"><div class="stat-label">Critical</div><div class="stat-value critical" id="critical">-</div></div>
     <div class="stat-card"><div class="stat-label">High</div><div class="stat-value high" id="high">-</div></div>
     <div class="stat-card"><div class="stat-label">Medium</div><div class="stat-value medium" id="medium">-</div></div>
   </div>
+
   <div class="section-title">Security Findings</div>
   <div id="findings"><div class="loading">Loading findings...</div></div>
 </div>
+
 <script>
 const API = "https://s1lbua66dj.execute-api.eu-north-1.amazonaws.com";
+let findingsCache = [];
+
 function getSeverityClass(sev) {
   if (sev >= 9) return "sev-critical";
   if (sev >= 7) return "sev-high";
   return "sev-medium";
 }
+
 function getSeverityLabel(sev) {
   if (sev >= 9) return "CRITICAL";
   if (sev >= 7) return "HIGH";
   return "MEDIUM";
 }
+
+async function explainFinding(index) {
+  try {
+    const finding = findingsCache[index];
+
+    const res = await fetch(`${API}/explain`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ finding })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      alert("AI Error:\n\n" + data.error);
+      return;
+    }
+
+    const e = data.explanation;
+
+    alert(
+      "🔍 WHAT HAPPENED\n\n" + e.what_happened +
+      "\n\n⚠️ WHY DANGEROUS\n\n" + e.why_dangerous +
+      "\n\n🎯 ATTACKER GOAL\n\n" + e.attacker_goal +
+      "\n\n🚨 IMMEDIATE ACTION\n\n" + e.immediate_action +
+      "\n\n🛠️ REMEDIATION\n\n" + e.remediation.join("\n")
+    );
+  } catch (err) {
+    alert("AI Request Failed:\n\n" + err.message);
+  }
+}
+
 async function loadFindings() {
   try {
     const res = await fetch(`${API}/findings`);
     const data = await res.json();
+
+    findingsCache = data.findings || [];
+
     if (data.source === "demo") {
       document.getElementById("demo-banner").innerHTML =
         '<div class="demo-banner">⚠️ Demo mode — showing sample findings. Connect GuardDuty to see real threats.</div>';
     }
-    const findings = data.findings;
+
     document.getElementById("total").textContent = data.total;
-    document.getElementById("critical").textContent = findings.filter(f => f.severity >= 9).length;
-    document.getElementById("high").textContent = findings.filter(f => f.severity >= 7 && f.severity < 9).length;
-    document.getElementById("medium").textContent = findings.filter(f => f.severity < 7).length;
-    document.getElementById("findings").innerHTML = findings.map(f => `
-      <div class="finding-card">
+    document.getElementById("critical").textContent = findingsCache.filter(f => f.severity >= 9).length;
+    document.getElementById("high").textContent = findingsCache.filter(f => f.severity >= 7 && f.severity < 9).length;
+    document.getElementById("medium").textContent = findingsCache.filter(f => f.severity < 7).length;
+
+    document.getElementById("findings").innerHTML =
+      findingsCache.map((f, index) => `
+      <div class="finding-card" onclick="explainFinding(${index})">
         <span class="severity-badge ${getSeverityClass(f.severity)}">${getSeverityLabel(f.severity)}</span>
         <div>
           <div class="finding-title">${f.title}</div>
           <div class="finding-type">${f.type}</div>
           <div class="finding-desc">${f.description}</div>
           <div class="finding-meta"><span class="source-tag">${f.source}</span>${f.timestamp}</div>
+          <div class="ai-hint">🤖 Click for AI Analysis</div>
         </div>
       </div>
-    `).join("");
+      `).join("");
   } catch(e) {
-    document.getElementById("findings").innerHTML = `<div class="loading">Error: ${e.message}</div>`;
+    document.getElementById("findings").innerHTML =
+      `<div class="loading">Error: ${e.message}</div>`;
   }
 }
+
 loadFindings();
 setInterval(loadFindings, 30000);
 </script>

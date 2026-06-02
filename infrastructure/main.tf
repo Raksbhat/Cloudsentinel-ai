@@ -11,7 +11,6 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-# IAM role for Lambda
 resource "aws_iam_role" "lambda_role" {
   name = "cloudsentinel-lambda-role"
 
@@ -25,7 +24,6 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# IAM policy — least privilege
 resource "aws_iam_role_policy" "lambda_policy" {
   name = "cloudsentinel-lambda-policy"
   role = aws_iam_role.lambda_role.id
@@ -52,12 +50,18 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "securityhub:GetFindings"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = "arn:aws:secretsmanager:eu-north-1:923187443111:secret:cloudsentinel/*"
       }
     ]
   })
 }
 
-# Lambda function
 resource "aws_lambda_function" "cloudsentinel_api" {
   filename         = "lambda.zip"
   function_name    = "cloudsentinel-api"
@@ -74,7 +78,6 @@ resource "aws_lambda_function" "cloudsentinel_api" {
   }
 }
 
-# API Gateway
 resource "aws_apigatewayv2_api" "cloudsentinel" {
   name          = "cloudsentinel-api"
   protocol_type = "HTTP"
