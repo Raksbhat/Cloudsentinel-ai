@@ -212,6 +212,83 @@ def enrich_with_mitre(findings):
 
     return enriched
 
+def get_cloudtrail_detections():
+    try:
+        ct = boto3.client(
+            "cloudtrail",
+            region_name="eu-north-1"
+        )
+
+        monitored_events = [
+            "RunInstances",
+            "StopLogging",
+            "ConsoleLogin",
+            "PutBucketAcl",
+            "AuthorizeSecurityGroupIngress"
+        ]
+
+        findings = []
+
+        for event_name in monitored_events:
+
+            response = ct.lookup_events(
+                LookupAttributes=[
+                    {
+                        "AttributeKey": "EventName",
+                        "AttributeValue": event_name
+                    }
+                ],
+                MaxResults=5
+            )
+
+            for event in response.get("Events", []):
+
+                severity = "Medium"
+                title = event_name
+                description = f"Detected CloudTrail event: {event_name}"
+
+                if event_name == "StopLogging":
+                    severity = "Critical"
+                    title = "CloudTrail Logging Disabled"
+                    description = "CloudTrail logging was disabled."
+
+                elif event_name == "RunInstances":
+                    severity = "Medium"
+                    title = "EC2 Instance Launched"
+                    description = "A new EC2 instance was launched."
+
+                elif event_name == "ConsoleLogin":
+                    severity = "Low"
+                    title = "AWS Console Login"
+                    description = "A user logged into the AWS console."
+
+                elif event_name == "PutBucketAcl":
+                    severity = "High"
+                    title = "S3 Bucket Permissions Modified"
+                    description = "S3 bucket ACL was modified."
+
+                elif event_name == "AuthorizeSecurityGroupIngress":
+                    severity = "High"
+                    title = "Security Group Rule Added"
+                    description = "Inbound security group rule was added."
+
+                findings.append({
+                    "id": event["EventId"],
+                    "title": title,
+                    "severity": severity,
+                    "type": event_name,
+                    "source": "CloudTrail",
+                    "timestamp": event["EventTime"].isoformat(),
+                    "description": description
+                })
+
+        return findings
+
+    except Exception as e:
+        return [{
+            "error": str(e)
+        }]
+
 def handler(event, context):
     path = event.get("rawPath", "/")
 
@@ -248,9 +325,7 @@ def handler(event, context):
 
     elif path == "/explain":
         try:
-            body_data = json.loads(
-                event.get("body", "{}")
-            )
+            body_data = json.loads(event.get("body", "{}"))
 
             finding = body_data.get("finding", {})
 
@@ -280,6 +355,14 @@ def handler(event, context):
             body = {
                 "error": str(e)
             }
+
+    elif path == "/cloudtrail-detections":
+        detections = get_cloudtrail_detections()
+
+        body = {
+            "findings": detections,
+            "total": len(detections)
+        }
 
     else:
         body = {
