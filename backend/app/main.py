@@ -11,6 +11,88 @@ MOCK_FINDINGS = [
     {"id": "mock-004", "title": "Root Account Console Login", "severity": 6.0, "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess", "source": "CloudTrail", "timestamp": "2026-05-30T09:00:00Z", "description": "Root account was used to log into the AWS console."},
     {"id": "mock-005", "title": "CloudTrail Logging Disabled", "severity": 9.5, "type": "Stealth:IAMUser/CloudTrailLoggingDisabled", "source": "GuardDuty", "timestamp": "2026-05-30T09:30:00Z", "description": "CloudTrail logging was disabled — possible attacker evasion."}
 ]
+MITRE_MAPPING = {
+    "Backdoor:EC2/C2Activity.B": {
+        "id": "T1071",
+        "technique": "Application Layer Protocol"
+    },
+    "UnauthorizedAccess:IAMUser/MaliciousIPCaller": {
+        "id": "T1078",
+        "technique": "Valid Accounts"
+    },
+    "Policy:S3/BucketPublicAccessGranted": {
+        "id": "T1530",
+        "technique": "Data from Cloud Storage"
+    },
+    "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess": {
+        "id": "T1078",
+        "technique": "Valid Accounts"
+    },
+    "Stealth:IAMUser/CloudTrailLoggingDisabled": {
+        "id": "T1562.008",
+        "technique": "Disable Cloud Logs"
+    },
+    "Recon:IAMUser/NetworkPermissions": {
+        "id": "T1595",
+        "technique": "Active Scanning"
+    },
+    "Recon:IAMUser/UserPermissions": {
+        "id": "T1069",
+        "technique": "Permission Groups Discovery"
+    },
+    "CredentialAccess:IAMUser/AnomalousBehavior": {
+        "id": "T1078",
+        "technique": "Valid Accounts"
+    },
+    "Execution:EC2/RunInstances": {
+        "id": "T1583.002",
+        "technique": "Acquire Infrastructure - Virtual Private Server"
+    },
+    "Persistence:IAMUser/CreateAccessKey": {
+        "id": "T1098",
+        "technique": "Account Manipulation"
+    },
+    "Persistence:IAMUser/CreateUser": {
+        "id": "T1136",
+        "technique": "Create Account"
+    },
+    "DefenseEvasion:CloudTrail/StopLogging": {
+        "id": "T1562.008",
+        "technique": "Disable Cloud Logs"
+    },
+    "PrivilegeEscalation:IAMUser/AttachAdminPolicy": {
+        "id": "T1098",
+        "technique": "Account Manipulation"
+    },
+    "Discovery:EC2/DescribeInstances": {
+        "id": "T1580",
+        "technique": "Cloud Infrastructure Discovery"
+    },
+    "Discovery:S3/ListBuckets": {
+        "id": "T1619",
+        "technique": "Cloud Storage Discovery"
+    },
+    "Exfiltration:S3/GetObject": {
+        "id": "T1537",
+        "technique": "Transfer Data to Cloud Account"
+    },
+    "Impact:EC2/TerminateInstances": {
+        "id": "T1485",
+        "technique": "Data Destruction"
+    },
+    "LateralMovement:STS/AssumeRole": {
+        "id": "T1078.004",
+        "technique": "Cloud Accounts"
+    },
+    "Collection:S3/ListObjects": {
+        "id": "T1530",
+        "technique": "Data from Cloud Storage"
+    },
+    "Persistence:EC2/UserDataBackdoor": {
+        "id": "T1053",
+        "technique": "Scheduled Task/Job"
+    }
+}
 
 def get_groq_api_key():
     try:
@@ -112,6 +194,23 @@ def get_guardduty_findings():
         pass
 
     return None
+def enrich_with_mitre(findings):
+    enriched = []
+
+    for finding in findings:
+        finding_copy = finding.copy()
+
+        finding_copy["mitre"] = MITRE_MAPPING.get(
+            finding.get("type"),
+            {
+                "id": "Unknown",
+                "technique": "Unknown"
+            }
+        )
+
+        enriched.append(finding_copy)
+
+    return enriched
 
 def handler(event, context):
     path = event.get("rawPath", "/")
@@ -139,6 +238,7 @@ def handler(event, context):
         real_findings = get_guardduty_findings()
 
         findings = real_findings if real_findings else MOCK_FINDINGS
+        findings = enrich_with_mitre(findings)
 
         body = {
             "findings": findings,
