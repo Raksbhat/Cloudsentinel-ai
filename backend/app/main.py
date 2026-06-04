@@ -5,108 +5,108 @@ import urllib.error
 from datetime import datetime, timezone
 
 MOCK_FINDINGS = [
-    {"id": "mock-001", "title": "IAM User Performing Unusual API Activity", "severity": 8.0, "type": "UnauthorizedAccess:IAMUser/MaliciousIPCaller", "source": "GuardDuty", "timestamp": "2026-05-30T06:00:00Z", "description": "An IAM user is making API calls from a known malicious IP address."},
-    {"id": "mock-002", "title": "EC2 Instance Communicating with C2 Server", "severity": 9.0, "type": "Backdoor:EC2/C2Activity.B", "source": "GuardDuty", "timestamp": "2026-05-30T07:00:00Z", "description": "An EC2 instance is communicating with a command and control server."},
-    {"id": "mock-003", "title": "S3 Bucket Made Public", "severity": 7.0, "type": "Policy:S3/BucketPublicAccessGranted", "source": "CloudTrail", "timestamp": "2026-05-30T08:00:00Z", "description": "An S3 bucket ACL was changed to allow public access."},
-    {"id": "mock-004", "title": "Root Account Console Login", "severity": 6.0, "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess", "source": "CloudTrail", "timestamp": "2026-05-30T09:00:00Z", "description": "Root account was used to log into the AWS console."},
-    {"id": "mock-005", "title": "CloudTrail Logging Disabled", "severity": 9.5, "type": "Stealth:IAMUser/CloudTrailLoggingDisabled", "source": "GuardDuty", "timestamp": "2026-05-30T09:30:00Z", "description": "CloudTrail logging was disabled — possible attacker evasion."}
+{"id": "mock-001", "title": "IAM User Performing Unusual API Activity", "severity": 8.0, "type": "UnauthorizedAccess:IAMUser/MaliciousIPCaller", "source": "GuardDuty", "timestamp": "2026-05-30T06:00:00Z", "description": "An IAM user is making API calls from a known malicious IP address."},
+{"id": "mock-002", "title": "EC2 Instance Communicating with C2 Server", "severity": 9.0, "type": "Backdoor:EC2/C2Activity.B", "source": "GuardDuty", "timestamp": "2026-05-30T07:00:00Z", "description": "An EC2 instance is communicating with a command and control server."},
+{"id": "mock-003", "title": "S3 Bucket Made Public", "severity": 7.0, "type": "Policy:S3/BucketPublicAccessGranted", "source": "CloudTrail", "timestamp": "2026-05-30T08:00:00Z", "description": "An S3 bucket ACL was changed to allow public access."},
+{"id": "mock-004", "title": "Root Account Console Login", "severity": 6.0, "type": "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess", "source": "CloudTrail", "timestamp": "2026-05-30T09:00:00Z", "description": "Root account was used to log into the AWS console."},
+{"id": "mock-005", "title": "CloudTrail Logging Disabled", "severity": 9.5, "type": "Stealth:IAMUser/CloudTrailLoggingDisabled", "source": "GuardDuty", "timestamp": "2026-05-30T09:30:00Z", "description": "CloudTrail logging was disabled — possible attacker evasion."}
 ]
 MITRE_MAPPING = {
-    "Backdoor:EC2/C2Activity.B": {
-        "id": "T1071",
-        "technique": "Application Layer Protocol"
-    },
-    "UnauthorizedAccess:IAMUser/MaliciousIPCaller": {
-        "id": "T1078",
-        "technique": "Valid Accounts"
-    },
-    "Policy:S3/BucketPublicAccessGranted": {
-        "id": "T1530",
-        "technique": "Data from Cloud Storage"
-    },
-    "UnauthorizedAccess:IAMUser/ConsoleLoginSuccess": {
-        "id": "T1078",
-        "technique": "Valid Accounts"
-    },
-    "Stealth:IAMUser/CloudTrailLoggingDisabled": {
-        "id": "T1562.008",
-        "technique": "Disable Cloud Logs"
-    },
-    "Recon:IAMUser/NetworkPermissions": {
-        "id": "T1595",
-        "technique": "Active Scanning"
-    },
-    "Recon:IAMUser/UserPermissions": {
-        "id": "T1069",
-        "technique": "Permission Groups Discovery"
-    },
-    "CredentialAccess:IAMUser/AnomalousBehavior": {
-        "id": "T1078",
-        "technique": "Valid Accounts"
-    },
-    "Execution:EC2/RunInstances": {
-        "id": "T1583.002",
-        "technique": "Acquire Infrastructure - Virtual Private Server"
-    },
-    "Persistence:IAMUser/CreateAccessKey": {
-        "id": "T1098",
-        "technique": "Account Manipulation"
-    },
-    "Persistence:IAMUser/CreateUser": {
-        "id": "T1136",
-        "technique": "Create Account"
-    },
-    "DefenseEvasion:CloudTrail/StopLogging": {
-        "id": "T1562.008",
-        "technique": "Disable Cloud Logs"
-    },
-    "PrivilegeEscalation:IAMUser/AttachAdminPolicy": {
-        "id": "T1098",
-        "technique": "Account Manipulation"
-    },
-    "Discovery:EC2/DescribeInstances": {
-        "id": "T1580",
-        "technique": "Cloud Infrastructure Discovery"
-    },
-    "Discovery:S3/ListBuckets": {
-        "id": "T1619",
-        "technique": "Cloud Storage Discovery"
-    },
-    "Exfiltration:S3/GetObject": {
-        "id": "T1537",
-        "technique": "Transfer Data to Cloud Account"
-    },
-    "Impact:EC2/TerminateInstances": {
-        "id": "T1485",
-        "technique": "Data Destruction"
-    },
-    "LateralMovement:STS/AssumeRole": {
-        "id": "T1078.004",
-        "technique": "Cloud Accounts"
-    },
-    "Collection:S3/ListObjects": {
-        "id": "T1530",
-        "technique": "Data from Cloud Storage"
-    },
-    "Persistence:EC2/UserDataBackdoor": {
-        "id": "T1053",
-        "technique": "Scheduled Task/Job"
-    }
+"Backdoor:EC2/C2Activity.B": {
+"id": "T1071",
+"technique": "Application Layer Protocol"
+},
+"UnauthorizedAccess:IAMUser/MaliciousIPCaller": {
+"id": "T1078",
+"technique": "Valid Accounts"
+},
+"Policy:S3/BucketPublicAccessGranted": {
+"id": "T1530",
+"technique": "Data from Cloud Storage"
+},
+"UnauthorizedAccess:IAMUser/ConsoleLoginSuccess": {
+"id": "T1078",
+"technique": "Valid Accounts"
+},
+"Stealth:IAMUser/CloudTrailLoggingDisabled": {
+"id": "T1562.008",
+"technique": "Disable Cloud Logs"
+},
+"Recon:IAMUser/NetworkPermissions": {
+"id": "T1595",
+"technique": "Active Scanning"
+},
+"Recon:IAMUser/UserPermissions": {
+"id": "T1069",
+"technique": "Permission Groups Discovery"
+},
+"CredentialAccess:IAMUser/AnomalousBehavior": {
+"id": "T1078",
+"technique": "Valid Accounts"
+},
+"Execution:EC2/RunInstances": {
+"id": "T1583.002",
+"technique": "Acquire Infrastructure - Virtual Private Server"
+},
+"Persistence:IAMUser/CreateAccessKey": {
+"id": "T1098",
+"technique": "Account Manipulation"
+},
+"Persistence:IAMUser/CreateUser": {
+"id": "T1136",
+"technique": "Create Account"
+},
+"DefenseEvasion:CloudTrail/StopLogging": {
+"id": "T1562.008",
+"technique": "Disable Cloud Logs"
+},
+"PrivilegeEscalation:IAMUser/AttachAdminPolicy": {
+"id": "T1098",
+"technique": "Account Manipulation"
+},
+"Discovery:EC2/DescribeInstances": {
+"id": "T1580",
+"technique": "Cloud Infrastructure Discovery"
+},
+"Discovery:S3/ListBuckets": {
+"id": "T1619",
+"technique": "Cloud Storage Discovery"
+},
+"Exfiltration:S3/GetObject": {
+"id": "T1537",
+"technique": "Transfer Data to Cloud Account"
+},
+"Impact:EC2/TerminateInstances": {
+"id": "T1485",
+"technique": "Data Destruction"
+},
+"LateralMovement:STS/AssumeRole": {
+"id": "T1078.004",
+"technique": "Cloud Accounts"
+},
+"Collection:S3/ListObjects": {
+"id": "T1530",
+"technique": "Data from Cloud Storage"
+},
+"Persistence:EC2/UserDataBackdoor": {
+"id": "T1053",
+"technique": "Scheduled Task/Job"
 }
-
+}
+REMEDIATION_REQUESTS = {}
 def get_groq_api_key():
-    try:
-        sm = boto3.client("secretsmanager", region_name="eu-north-1")
-        response = sm.get_secret_value(
-            SecretId="cloudsentinel/groq-api-key"
-        )
-        return response["SecretString"], None
-    except Exception as e:
-        return None, str(e)
+try:
+sm = boto3.client("secretsmanager", region_name="eu-north-1")
+response = sm.get_secret_value(
+SecretId="cloudsentinel/groq-api-key"
+)
+return response["SecretString"], None
+except Exception as e:
+return None, str(e)
 
 def explain_finding_with_ai(finding, api_key):
-    try:
-        prompt = f"""You are a cloud security expert. Analyze this AWS security finding and respond ONLY with valid JSON.
+try:
+prompt = f"""You are a cloud security expert. Analyze this AWS security finding and respond ONLY with valid JSON.
 
 Finding: {finding.get('title')}
 Type: {finding.get('type')}
@@ -117,260 +117,362 @@ Respond with exactly this JSON:
 {{"what_happened":"plain english explanation","why_dangerous":"why this is dangerous","attacker_goal":"what attacker wants","immediate_action":"what to do now","remediation":["step1","step2","step3"]}}
 """
 
-        payload = json.dumps({
-            "model": "llama-3.1-8b-instant",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.3,
-            "max_tokens": 500
-        }).encode("utf-8")
+payload = json.dumps({  
+        "model": "llama-3.1-8b-instant",  
+        "messages": [  
+            {  
+                "role": "user",  
+                "content": prompt  
+            }  
+        ],  
+        "temperature": 0.3,  
+        "max_tokens": 500  
+    }).encode("utf-8")  
 
-        req = urllib.request.Request(
-    "https://api.groq.com/openai/v1/chat/completions",
-    data=payload,
-    headers={
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
-    }
+    req = urllib.request.Request(  
+"https://api.groq.com/openai/v1/chat/completions",  
+data=payload,  
+headers={  
+    "Authorization": f"Bearer {api_key}",  
+    "Content-Type": "application/json",  
+    "User-Agent": "Mozilla/5.0"  
+}
+
 )
 
-        with urllib.request.urlopen(req, timeout=15) as response:
-            result = json.loads(
-                response.read().decode("utf-8")
-            )
+with urllib.request.urlopen(req, timeout=15) as response:  
+        result = json.loads(  
+            response.read().decode("utf-8")  
+        )  
 
-            content = result["choices"][0]["message"]["content"].strip()
+        content = result["choices"][0]["message"]["content"].strip()  
 
-            return json.loads(content), None
+        return json.loads(content), None  
 
-    except urllib.error.HTTPError as e:
-        try:
-            error_body = e.read().decode("utf-8")
-            return None, f"GROQ_HTTP_ERROR: {error_body}"
-        except:
-            return None, f"GROQ_HTTP_ERROR: {e.code}"
+except urllib.error.HTTPError as e:  
+    try:  
+        error_body = e.read().decode("utf-8")  
+        return None, f"GROQ_HTTP_ERROR: {error_body}"  
+    except:  
+        return None, f"GROQ_HTTP_ERROR: {e.code}"  
 
-    except Exception as e:
-        return None, f"GROQ_EXCEPTION: {str(e)}"
+except Exception as e:  
+    return None, f"GROQ_EXCEPTION: {str(e)}"
 
 def get_guardduty_findings():
-    try:
-        gd = boto3.client("guardduty", region_name="eu-north-1")
+try:
+gd = boto3.client("guardduty", region_name="eu-north-1")
 
-        detectors = gd.list_detectors()
+detectors = gd.list_detectors()  
 
-        if detectors["DetectorIds"]:
-            detector_id = detectors["DetectorIds"][0]
+    if detectors["DetectorIds"]:  
+        detector_id = detectors["DetectorIds"][0]  
 
-            response = gd.list_findings(
-                DetectorId=detector_id,
-                MaxResults=20
-            )
+        response = gd.list_findings(  
+            DetectorId=detector_id,  
+            MaxResults=20  
+        )  
 
-            if response["FindingIds"]:
-                details = gd.get_findings(
-                    DetectorId=detector_id,
-                    FindingIds=response["FindingIds"]
-                )
+        if response["FindingIds"]:  
+            details = gd.get_findings(  
+                DetectorId=detector_id,  
+                FindingIds=response["FindingIds"]  
+            )  
 
-                return [
-                    {
-                        "id": f["Id"],
-                        "title": f["Title"],
-                        "severity": f["Severity"],
-                        "type": f["Type"],
-                        "source": "GuardDuty",
-                        "timestamp": f["UpdatedAt"],
-                        "description": f.get("Description", "")
-                    }
-                    for f in details["Findings"]
-                ]
-    except Exception:
-        pass
+            return [  
+                {  
+                    "id": f["Id"],  
+                    "title": f["Title"],  
+                    "severity": f["Severity"],  
+                    "type": f["Type"],  
+                    "source": "GuardDuty",  
+                    "timestamp": f["UpdatedAt"],  
+                    "description": f.get("Description", "")  
+                }  
+                for f in details["Findings"]  
+            ]  
+except Exception:  
+    pass  
 
-    return None
+return None
+
 def enrich_with_mitre(findings):
-    enriched = []
+enriched = []
 
-    for finding in findings:
-        finding_copy = finding.copy()
+for finding in findings:  
+    finding_copy = finding.copy()  
 
-        finding_copy["mitre"] = MITRE_MAPPING.get(
-            finding.get("type"),
-            {
-                "id": "Unknown",
-                "technique": "Unknown"
-            }
-        )
+    finding_copy["mitre"] = MITRE_MAPPING.get(  
+        finding.get("type"),  
+        {  
+            "id": "Unknown",  
+            "technique": "Unknown"  
+        }  
+    )  
 
-        enriched.append(finding_copy)
+    enriched.append(finding_copy)  
 
-    return enriched
+return enriched
 
 def get_cloudtrail_detections():
-    try:
-        ct = boto3.client(
-            "cloudtrail",
-            region_name="eu-north-1"
-        )
+try:
+ct = boto3.client(
+"cloudtrail",
+region_name="eu-north-1"
+)
 
-        monitored_events = [
-            "RunInstances",
-            "StopLogging",
-            "ConsoleLogin",
-            "PutBucketAcl",
-            "AuthorizeSecurityGroupIngress"
-        ]
+monitored_events = [  
+        "RunInstances",  
+        "StopLogging",  
+        "ConsoleLogin",  
+        "PutBucketAcl",  
+        "AuthorizeSecurityGroupIngress"  
+    ]  
 
-        findings = []
+    findings = []  
 
-        for event_name in monitored_events:
+    for event_name in monitored_events:  
 
-            response = ct.lookup_events(
-                LookupAttributes=[
-                    {
-                        "AttributeKey": "EventName",
-                        "AttributeValue": event_name
-                    }
-                ],
-                MaxResults=5
-            )
+        response = ct.lookup_events(  
+            LookupAttributes=[  
+                {  
+                    "AttributeKey": "EventName",  
+                    "AttributeValue": event_name  
+                }  
+            ],  
+            MaxResults=5  
+        )  
 
-            for event in response.get("Events", []):
+        for event in response.get("Events", []):  
 
-                severity = "Medium"
-                title = event_name
-                description = f"Detected CloudTrail event: {event_name}"
+            severity = "Medium"  
+            title = event_name  
+            description = f"Detected CloudTrail event: {event_name}"  
 
-                if event_name == "StopLogging":
-                    severity = "Critical"
-                    title = "CloudTrail Logging Disabled"
-                    description = "CloudTrail logging was disabled."
+            if event_name == "StopLogging":  
+                severity = "Critical"  
+                title = "CloudTrail Logging Disabled"  
+                description = "CloudTrail logging was disabled."  
 
-                elif event_name == "RunInstances":
-                    severity = "Medium"
-                    title = "EC2 Instance Launched"
-                    description = "A new EC2 instance was launched."
+            elif event_name == "RunInstances":  
+                severity = "Medium"  
+                title = "EC2 Instance Launched"  
+                description = "A new EC2 instance was launched."  
 
-                elif event_name == "ConsoleLogin":
-                    severity = "Low"
-                    title = "AWS Console Login"
-                    description = "A user logged into the AWS console."
+            elif event_name == "ConsoleLogin":  
+                severity = "Low"  
+                title = "AWS Console Login"  
+                description = "A user logged into the AWS console."  
 
-                elif event_name == "PutBucketAcl":
-                    severity = "High"
-                    title = "S3 Bucket Permissions Modified"
-                    description = "S3 bucket ACL was modified."
+            elif event_name == "PutBucketAcl":  
+                severity = "High"  
+                title = "S3 Bucket Permissions Modified"  
+                description = "S3 bucket ACL was modified."  
 
-                elif event_name == "AuthorizeSecurityGroupIngress":
-                    severity = "High"
-                    title = "Security Group Rule Added"
-                    description = "Inbound security group rule was added."
+            elif event_name == "AuthorizeSecurityGroupIngress":  
+                severity = "High"  
+                title = "Security Group Rule Added"  
+                description = "Inbound security group rule was added."  
 
-                findings.append({
-                    "id": event["EventId"],
-                    "title": title,
-                    "severity": severity,
-                    "type": event_name,
-                    "source": "CloudTrail",
-                    "timestamp": event["EventTime"].isoformat(),
-                    "description": description
-                })
+            findings.append({  
+                "id": event["EventId"],  
+                "title": title,  
+                "severity": severity,  
+                "type": event_name,  
+                "source": "CloudTrail",  
+                "timestamp": event["EventTime"].isoformat(),  
+                "description": description  
+            })  
 
-        return findings
+    return findings  
 
-    except Exception as e:
-        return [{
-            "error": str(e)
-        }]
+except Exception as e:  
+    return [{  
+        "error": str(e)  
+    }]
+
+def create_remediation_request(finding):
+finding_type = finding.get("type", "")
+
+action = "Manual Review Required"  
+
+if "S3" in finding_type:  
+    action = "Block public access on affected S3 bucket"  
+
+elif (  
+    "SecurityGroup" in finding_type or  
+    "AuthorizeSecurityGroupIngress" in finding_type  
+):  
+    action = "Remove public inbound security group rule"  
+
+elif (  
+    "StopLogging" in finding_type or  
+    "CloudTrailLoggingDisabled" in finding_type  
+):  
+    action = "Re-enable CloudTrail logging"  
+
+request = {  
+    "finding_id": finding.get("id"),  
+    "finding_type": finding_type,  
+    "status": "PENDING_APPROVAL",  
+    "proposed_action": action,  
+    "created_at": datetime.now(  
+        timezone.utc  
+    ).isoformat()  
+}  
+
+REMEDIATION_REQUESTS[  
+    finding.get("id")  
+] = request  
+
+return request
 
 def handler(event, context):
-    path = event.get("rawPath", "/")
+path = event.get("rawPath", "/")
 
-    headers = {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-    }
+headers = {  
+    "Content-Type": "application/json",  
+    "Access-Control-Allow-Origin": "*"  
+}  
 
-    if path in ["/", ""]:
-        body = {
-            "status": "CloudSentinel AI is running",
-            "version": "1.0.0"
-        }
+if path in ["/", ""]:  
+    body = {  
+        "status": "CloudSentinel AI is running",  
+        "version": "1.0.0"  
+    }  
 
-    elif path == "/health":
-        body = {
-            "status": "healthy",
-            "timestamp": datetime.now(
-                timezone.utc
-            ).isoformat()
-        }
+elif path == "/health":  
+    body = {  
+        "status": "healthy",  
+        "timestamp": datetime.now(  
+            timezone.utc  
+        ).isoformat()  
+    }  
 
-    elif path == "/findings":
-        real_findings = get_guardduty_findings()
+  
 
-        findings = real_findings if real_findings else MOCK_FINDINGS
-        findings = enrich_with_mitre(findings)
+elif path == "/findings":  
+    real_findings = get_guardduty_findings()  
 
-        body = {
-            "findings": findings,
-            "total": len(findings),
-            "source": "live" if real_findings else "demo"
-        }
+    findings = real_findings if real_findings else MOCK_FINDINGS  
+    findings = enrich_with_mitre(findings)  
 
-    elif path == "/explain":
-        try:
-            body_data = json.loads(event.get("body", "{}"))
+    body = {  
+        "findings": findings,  
+        "total": len(findings),  
+        "source": "live" if real_findings else "demo"  
+    }  
 
-            finding = body_data.get("finding", {})
+elif path == "/explain":  
+    try:  
+        body_data = json.loads(event.get("body", "{}"))  
 
-            api_key, err = get_groq_api_key()
+        finding = body_data.get("finding", {})  
 
-            if not api_key:
-                body = {
-                    "error": f"Could not get API key: {err}"
-                }
-            else:
-                explanation, err = explain_finding_with_ai(
-                    finding,
-                    api_key
-                )
+        api_key, err = get_groq_api_key()  
 
-                if err:
-                    body = {
-                        "error": err
-                    }
-                else:
-                    body = {
-                        "explanation": explanation,
-                        "finding_id": finding.get("id")
-                    }
+        if not api_key:  
+            body = {  
+                "error": f"Could not get API key: {err}"  
+            }  
+        else:  
+            explanation, err = explain_finding_with_ai(  
+                finding,  
+                api_key  
+            )  
 
-        except Exception as e:
-            body = {
-                "error": str(e)
-            }
+            if err:  
+                body = {  
+                    "error": err  
+                }  
+            else:  
+                body = {  
+                    "explanation": explanation,  
+                    "finding_id": finding.get("id")  
+                }  
 
-    elif path == "/cloudtrail-detections":
-        detections = get_cloudtrail_detections()
+    except Exception as e:  
+        body = {  
+            "error": str(e)  
+        }  
 
-        body = {
-            "findings": detections,
-            "total": len(detections)
-        }
+elif path == "/cloudtrail-detections":  
+    detections = get_cloudtrail_detections()  
 
-    else:
-        body = {
-            "error": "Not found"
-        }
+    body = {  
+        "findings": detections,  
+        "total": len(detections)  
+    }  
+elif path == "/remediate":  
+    try:  
+        body_data = json.loads(  
+            event.get("body", "{}")  
+        )  
 
-    return {
-        "statusCode": 200,
-        "headers": headers,
-        "body": json.dumps(body)
+        finding = body_data.get(  
+            "finding",  
+            {}  
+        )  
+
+        request = create_remediation_request(  
+            finding  
+        )  
+
+        body = request  
+
+    except Exception as e:  
+        body = {  
+            "error": str(e)  
+        }  
+elif path == "/approve-remediation":  
+    try:  
+        body_data = json.loads(  
+            event.get("body", "{}")  
+        )  
+
+        finding_id = body_data.get(  
+            "finding_id"  
+        )  
+
+        request = REMEDIATION_REQUESTS.get(  
+            finding_id  
+        )  
+
+        if not request:  
+            body = {  
+                "error": "Remediation request not found"  
+            }  
+
+        else:  
+            request["status"] = "APPROVED"  
+            request["approved_at"] = datetime.now(  
+                timezone.utc  
+            ).isoformat()  
+
+            body = {  
+                "status": "APPROVED",  
+                "finding_id": finding_id,  
+                "action": request[  
+                    "proposed_action"  
+                ],  
+                "message": (  
+                    "Remediation approved. "  
+                    "Execution simulation completed."  
+                )  
+            }  
+
+    except Exception as e:  
+        body = {  
+            "error": str(e)  
+        }  
+
+else:  
+    body = {  
+        "error": "Not found"  
+    }  
+
+return {  
+    "statusCode": 200,  
+    "headers": headers,  
+    "body": json.dumps(body)  
     }
