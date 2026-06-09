@@ -1,9 +1,14 @@
-
 import json
 import boto3
 import urllib.request
 import urllib.error
+import os
+import time
+import hashlib
+dynamodb = boto3.resource("dynamodb")
+TABLE_NAME = os.environ.get("FINDINGS_TABLE")
 from datetime import datetime, timezone
+
 
 MOCK_FINDINGS = [
     {"id": "mock-001", "title": "IAM User Performing Unusual API Activity", "severity": 8.0, "type": "UnauthorizedAccess:IAMUser/MaliciousIPCaller", "source": "GuardDuty", "timestamp": "2026-05-30T06:00:00Z", "description": "An IAM user is making API calls from a known malicious IP address."},
@@ -105,18 +110,22 @@ def get_groq_api_key():
     except Exception as e:
         return None, str(e)
 
+
 def explain_finding_with_ai(finding, api_key):
     try:
         prompt = f"""You are a cloud security expert. Analyze this AWS security finding and respond ONLY with valid JSON.
+
 
 Finding: {finding.get('title')}
 Type: {finding.get('type')}
 Severity: {finding.get('severity')}/10
 Description: {finding.get('description')}
 
+
 Respond with exactly this JSON:
 {{"what_happened":"plain english explanation","why_dangerous":"why this is dangerous","attacker_goal":"what attacker wants","immediate_action":"what to do now","remediation":["step1","step2","step3"]}}
 """
+
 
         payload = json.dumps({
             "model": "llama-3.1-8b-instant",
@@ -130,6 +139,7 @@ Respond with exactly this JSON:
             "max_tokens": 500
         }).encode("utf-8")
 
+
         req = urllib.request.Request(
     "https://api.groq.com/openai/v1/chat/completions",
     data=payload,
@@ -140,14 +150,18 @@ Respond with exactly this JSON:
     }
 )
 
+
         with urllib.request.urlopen(req, timeout=15) as response:
             result = json.loads(
                 response.read().decode("utf-8")
             )
 
+
             content = result["choices"][0]["message"]["content"].strip()
 
+
             return json.loads(content), None
+
 
     except urllib.error.HTTPError as e:
         try:
@@ -156,28 +170,35 @@ Respond with exactly this JSON:
         except:
             return None, f"GROQ_HTTP_ERROR: {e.code}"
 
+
     except Exception as e:
         return None, f"GROQ_EXCEPTION: {str(e)}"
+
 
 def get_guardduty_findings():
     try:
         gd = boto3.client("guardduty", region_name="eu-north-1")
 
+
         detectors = gd.list_detectors()
+
 
         if detectors["DetectorIds"]:
             detector_id = detectors["DetectorIds"][0]
+
 
             response = gd.list_findings(
                 DetectorId=detector_id,
                 MaxResults=20
             )
 
+
             if response["FindingIds"]:
                 details = gd.get_findings(
                     DetectorId=detector_id,
                     FindingIds=response["FindingIds"]
                 )
+
 
                 return [
                     {
@@ -194,12 +215,15 @@ def get_guardduty_findings():
     except Exception:
         pass
 
+
     return None
 def enrich_with_mitre(findings):
     enriched = []
 
+
     for finding in findings:
         finding_copy = finding.copy()
+
 
         finding_copy["mitre"] = MITRE_MAPPING.get(
             finding.get("type"),
@@ -209,9 +233,12 @@ def enrich_with_mitre(findings):
             }
         )
 
+
         enriched.append(finding_copy)
 
+
     return enriched
+
 
 def get_cloudtrail_detections():
     try:
@@ -219,6 +246,7 @@ def get_cloudtrail_detections():
             "cloudtrail",
             region_name="eu-north-1"
         )
+
 
         monitored_events = [
             "RunInstances",
@@ -228,9 +256,12 @@ def get_cloudtrail_detections():
             "AuthorizeSecurityGroupIngress"
         ]
 
+
         findings = []
 
+
         for event_name in monitored_events:
+
 
             response = ct.lookup_events(
                 LookupAttributes=[
@@ -242,36 +273,44 @@ def get_cloudtrail_detections():
                 MaxResults=5
             )
 
+
             for event in response.get("Events", []):
+
 
                 severity = "Medium"
                 title = event_name
                 description = f"Detected CloudTrail event: {event_name}"
+
 
                 if event_name == "StopLogging":
                     severity = "Critical"
                     title = "CloudTrail Logging Disabled"
                     description = "CloudTrail logging was disabled."
 
+
                 elif event_name == "RunInstances":
                     severity = "Medium"
                     title = "EC2 Instance Launched"
                     description = "A new EC2 instance was launched."
+
 
                 elif event_name == "ConsoleLogin":
                     severity = "Low"
                     title = "AWS Console Login"
                     description = "A user logged into the AWS console."
 
+
                 elif event_name == "PutBucketAcl":
                     severity = "High"
                     title = "S3 Bucket Permissions Modified"
                     description = "S3 bucket ACL was modified."
 
+
                 elif event_name == "AuthorizeSecurityGroupIngress":
                     severity = "High"
                     title = "Security Group Rule Added"
                     description = "Inbound security group rule was added."
+
 
                 findings.append({
                     "id": event["EventId"],
@@ -283,19 +322,69 @@ def get_cloudtrail_detections():
                     "description": description
                 })
 
+
         return findings
+
 
     except Exception as e:
         return [{
             "error": str(e)
         }]
+def save_finding(finding):
+    table = dynamodb.Table(TABLE_NAME)
+
+
+    finding_id = hashlib.sha256(
+        (
+            finding["id"] +
+            finding["type"] +
+            finding["timestamp"]
+        ).encode()
+    ).hexdigest()
+
+
+    ttl = int(time.time()) + (90 * 24 * 60 * 60)
+
+
+    item = {
+        "finding_id": finding_id,
+        "title": finding["title"],
+        "severity": str(finding["severity"]),
+        "type": finding["type"],
+        "source": finding["source"],
+        "timestamp": finding["timestamp"],
+        "description": finding["description"],
+        "status": "OPEN",
+        "expires_at": ttl
+    }
+
+
+    table.put_item(Item=item)
+
+
+    return finding_id
+
+
+
+
+def get_saved_findings():
+    table = dynamodb.Table(TABLE_NAME)
+
+
+    response = table.scan()
+
+
+    return response.get("Items", [])
 def create_remediation_request(finding):
     finding_type = finding.get("type", "")
 
+
     action = "Manual Review Required"
+
 
     if "S3" in finding_type:
         action = "Block public access on affected S3 bucket"
+
 
     elif (
         "SecurityGroup" in finding_type or
@@ -303,11 +392,13 @@ def create_remediation_request(finding):
     ):
         action = "Remove public inbound security group rule"
 
+
     elif (
         "StopLogging" in finding_type or
         "CloudTrailLoggingDisabled" in finding_type
     ):
         action = "Re-enable CloudTrail logging"
+
 
     request = {
         "finding_id": finding.get("id"),
@@ -319,25 +410,31 @@ def create_remediation_request(finding):
         ).isoformat()
     }
 
+
     REMEDIATION_REQUESTS[
         finding.get("id")
     ] = request
 
+
     return request
+
 
 def handler(event, context):
     path = event.get("rawPath", "/")
+
 
     headers = {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
     }
 
+
     if path in ["/", ""]:
         body = {
             "status": "CloudSentinel AI is running",
             "version": "1.0.0"
         }
+
 
     elif path == "/health":
         body = {
@@ -347,27 +444,26 @@ def handler(event, context):
             ).isoformat()
         }
 
-    
 
     elif path == "/findings":
-        real_findings = get_guardduty_findings()
-
-        findings = real_findings if real_findings else MOCK_FINDINGS
-        findings = enrich_with_mitre(findings)
-
+        findings = get_saved_findings()
         body = {
             "findings": findings,
             "total": len(findings),
-            "source": "live" if real_findings else "demo"
+            "source": "dynamodb"
         }
+
 
     elif path == "/explain":
         try:
             body_data = json.loads(event.get("body", "{}"))
 
+
             finding = body_data.get("finding", {})
 
+
             api_key, err = get_groq_api_key()
+
 
             if not api_key:
                 body = {
@@ -379,6 +475,7 @@ def handler(event, context):
                     api_key
                 )
 
+
                 if err:
                     body = {
                         "error": err
@@ -389,34 +486,50 @@ def handler(event, context):
                         "finding_id": finding.get("id")
                     }
 
+
         except Exception as e:
             body = {
                 "error": str(e)
             }
 
+
     elif path == "/cloudtrail-detections":
         detections = get_cloudtrail_detections()
+
+
+        for finding in detections:
+            try:
+                save_finding(finding)
+            except Exception:
+                pass
+
 
         body = {
             "findings": detections,
             "total": len(detections)
         }
+
+
     elif path == "/remediate":
         try:
             body_data = json.loads(
                 event.get("body", "{}")
             )
 
+
             finding = body_data.get(
                 "finding",
                 {}
             )
 
+
             request = create_remediation_request(
                 finding
             )
 
+
             body = request
+
 
         except Exception as e:
             body = {
@@ -428,24 +541,29 @@ def handler(event, context):
                 event.get("body", "{}")
             )
 
+
             finding_id = body_data.get(
                 "finding_id"
             )
 
+
             request = REMEDIATION_REQUESTS.get(
                 finding_id
             )
+
 
             if not request:
                 body = {
                     "error": "Remediation request not found"
                 }
 
+
             else:
                 request["status"] = "APPROVED"
                 request["approved_at"] = datetime.now(
                     timezone.utc
                 ).isoformat()
+
 
                 body = {
                     "status": "APPROVED",
@@ -459,18 +577,24 @@ def handler(event, context):
                     )
                 }
 
+
         except Exception as e:
             body = {
                 "error": str(e)
             }
+
 
     else:
         body = {
             "error": "Not found"
         }
 
+
     return {
         "statusCode": 200,
         "headers": headers,
         "body": json.dumps(body)
     }
+
+
+
