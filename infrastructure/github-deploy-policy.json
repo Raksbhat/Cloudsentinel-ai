@@ -1,0 +1,64 @@
+{
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "LambdaDeployment",
+"Effect": "Allow",
+"Action": [
+"lambda:GetFunction",
+"lambda:GetPolicy",
+"lambda:ListVersionsByFunction",
+"lambda:GetFunctionCodeSigningConfig",
+"lambda:UpdateFunctionCode",
+"lambda:UpdateFunctionConfiguration"
+],
+"Resource": "arn:aws:lambda:eu-north-1:923187443111:function:cloudsentinel-api"
+}
+,
+{
+"Sid": "FrontendBucket",
+"Effect": "Allow",
+"Action": [
+"s3:ListBucket"
+],
+"Resource": "arn:aws:s3:::cloudsentinel-ai-frontend-923187443111"
+},
+{
+"Sid": "FrontendObjects",
+"Effect": "Allow",
+"Action": [
+"s3:GetObject",
+"s3:PutObject",
+"s3:DeleteObject"
+],
+"Resource": "arn:aws:s3:::cloudsentinel-ai-frontend-923187443111/*"
+},
+{
+"Sid": "TerraformStateBucket",
+"Effect": "Allow",
+"Action": [
+"s3:ListBucket"
+],
+"Resource": "arn:aws:s3:::cloudsentinel-tfstate-923187443111"
+},
+{
+"Sid": "TerraformStateObjects",
+"Effect": "Allow",
+"Action": [
+"s3:GetObject",
+"s3:PutObject",
+"s3:DeleteObject"
+],
+"Resource": "arn:aws:s3:::cloudsentinel-tfstate-923187443111/*"
+},
+{
+"Sid": "ApiGatewayRead",
+"Effect": "Allow",
+"Action": [
+"apigateway:GET"
+],
+"Resource": "*"
+}
+]
+}
+

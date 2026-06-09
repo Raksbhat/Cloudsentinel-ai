@@ -1,4 +1,3 @@
-
 terraform {
   backend "s3" {
     bucket = "cloudsentinel-tfstate-923187443111"
@@ -162,5 +161,6 @@ resource "aws_lambda_permission" "api_gateway" {
 output "api_url" {
   value = aws_apigatewayv2_stage.prod.invoke_url
 }
+
 
 
