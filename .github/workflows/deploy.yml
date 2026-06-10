@@ -29,6 +29,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Build Lambda Package
+        run: |
+          cd backend/app
+          zip -r ../../infrastructure/lambda.zip .
+
       - name: Terraform Init
         working-directory: infrastructure
         run: terraform init
