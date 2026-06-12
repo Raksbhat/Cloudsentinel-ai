@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CloudSentinel AI</title>
-
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -21,18 +21,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 16px;
 }
-
 .logo {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #38bdf8;
 }
-
 .logo span {
   color: #f43f5e;
 }
-
 .status-badge {
   background: #052e16;
   color: #4ade80;
@@ -44,11 +42,13 @@ body {
 
 .container {
   padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   margin-bottom: 32px;
 }
@@ -58,6 +58,11 @@ body {
   border: 1px solid #1e3a5f;
   border-radius: 8px;
   padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
 }
 
 .stat-label {
@@ -66,23 +71,23 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .stat-value {
   font-size: 32px;
   font-weight: 700;
   margin-top: 8px;
 }
-
-.critical { color: #f43f5e; }
-.high { color: #fb923c; }
-.medium { color: #fbbf24; }
 .total { color: #38bdf8; }
+.critical { color: #f43f5e; }
+.high     { color: #fb923c; }
+.medium   { color: #fbbf24; }
+.low      { color: #4ade80; } /* New color for Low severity */
 
 .section-title {
   font-size: 14px;
-  color: #64748b;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-top: 32px;
   margin-bottom: 16px;
 }
 
@@ -96,11 +101,12 @@ body {
   align-items: flex-start;
   gap: 16px;
   cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
-
 .finding-card:hover {
-  border-color: #38bdf8;
-  transition: 0.2s;
+  transform: translateY(-2px);
+  background: #141b2e;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
 }
 
 .severity-badge {
@@ -110,101 +116,49 @@ body {
   font-weight: 700;
   white-space: nowrap;
 }
-
 .sev-critical {
   background: #450a0a;
   color: #f43f5e;
   border: 1px solid #f43f5e;
 }
-
 .sev-high {
   background: #431407;
   color: #fb923c;
   border: 1px solid #fb923c;
 }
-.remediate-btn {
-	  margin-top: 10px;
-	    background: #7f1d1d;
-	      color: white;
-	        border: 1px solid #ef4444;
-		  border-radius: 6px;
-		    padding: 8px 12px;
-		      cursor: pointer;
-		        font-size: 12px;
-			  font-weight: 600;
-}
-
-.remediate-btn:hover {
-	  background: #991b1b;
-}
-
-.remediation-status {
-	  margin-top: 8px;
-	    color: #4ade80;
-	      font-size: 12px;
-}
-
 .sev-medium {
   background: #422006;
   color: #fbbf24;
   border: 1px solid #fbbf24;
 }
 
-.finding-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.finding-type {
-  font-size: 12px;
-  color: #38bdf8;
-  font-family: monospace;
-}
-
-.finding-desc {
-  font-size: 13px;
-  color: #94a3b8;
-  margin-top: 8px;
-}
-
-.finding-meta {
-  font-size: 11px;
-  color: #475569;
-  margin-top: 8px;
-}
-
+/* Additional UI tag styles */
 .source-tag {
-  display: inline-block;
   background: #1e293b;
-  padding: 2px 8px;
-  border-radius: 3px;
+  color: #64748b;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
   margin-right: 8px;
 }
-
-.loading {
-  text-align: center;
-  color: #38bdf8;
-  padding: 60px;
-  font-size: 18px;
-}
-
-.demo-banner {
-  background: #1e1a05;
-  border: 1px solid #854d0e;
-  border-radius: 8px;
-  padding: 12px 20px;
-  margin-bottom: 24px;
-  color: #fbbf24;
+.remediate-btn {
+  margin-top: 10px;
+  background: #7f1d1d;
+  color: white;
+  border: 1px solid #991b1b;
+  border-radius: 4px;
   font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
 }
-
+.remediate-btn:hover {
+  background: #991b1b;
+}
 .ai-hint {
   margin-top: 10px;
   color: #38bdf8;
   font-size: 12px;
 }
-
 .mitre-tag {
   display: inline-block;
   margin-top: 8px;
@@ -215,9 +169,9 @@ body {
   color: #38bdf8;
   font-size: 11px;
 }
+
 </style>
 </head>
-
 <body>
 
 <div class="header">
@@ -226,7 +180,6 @@ body {
 </div>
 
 <div class="container">
-
   <div id="demo-banner"></div>
 
   <div class="stats">
@@ -234,20 +187,21 @@ body {
       <div class="stat-label">Total Findings</div>
       <div class="stat-value total" id="total">-</div>
     </div>
-
     <div class="stat-card">
       <div class="stat-label">Critical</div>
       <div class="stat-value critical" id="critical">-</div>
     </div>
-
     <div class="stat-card">
       <div class="stat-label">High</div>
       <div class="stat-value high" id="high">-</div>
     </div>
-
     <div class="stat-card">
       <div class="stat-label">Medium</div>
       <div class="stat-value medium" id="medium">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Low</div>
+      <div class="stat-value low" id="low">-</div>
     </div>
   </div>
 
@@ -255,58 +209,116 @@ body {
   <div id="findings">
     <div class="loading">Loading findings...</div>
   </div>
-
 </div>
 
 <br><br>
-
 <div class="section-title">CloudTrail Detections</div>
-
-<div id="cloudtrail">
-  <div class="loading">Loading detections...</div>
-</div>
+<div id="cloudtrail"></div>
 
 <script>
-
 const API = "https://s1lbua66dj.execute-api.eu-north-1.amazonaws.com";
-
 let findingsCache = [];
 
+/* Helper functions for severity */
 function getSeverityClass(sev) {
-  if (sev >= 9) return "sev-critical";
-  if (sev >= 7) return "sev-high";
+  if (sev === "Critical") return "sev-critical";
+  if (sev === "High")     return "sev-high";
+  // Treat Medium/Low as medium-style for now
   return "sev-medium";
 }
-
 function getSeverityLabel(sev) {
-  if (sev >= 9) return "CRITICAL";
-  if (sev >= 7) return "HIGH";
-  return "MEDIUM";
+  return sev.toUpperCase();
 }
 
-async function explainFinding(index) {
-
+/* Load findings from API and render */
+async function loadFindings() {
   try {
+    const res = await fetch(`${API}/findings`);
+    const data = await res.json();
+    findingsCache = data.findings || [];
+    document.getElementById("total").textContent = data.total || findingsCache.length;
+    document.getElementById("critical").textContent =
+      findingsCache.filter(f => f.severity === "Critical").length;
+    document.getElementById("high").textContent =
+      findingsCache.filter(f => f.severity === "High").length;
+    document.getElementById("medium").textContent =
+      findingsCache.filter(f => f.severity === "Medium").length;
+    document.getElementById("low").textContent =
+      findingsCache.filter(f => f.severity === "Low").length;
 
-    const finding = findingsCache[index];
+    document.getElementById("findings").innerHTML =
+      findingsCache.map((f, index) => `
+      <div class="finding-card" onclick="explainFinding(${index})">
+        <span class="severity-badge ${getSeverityClass(f.severity)}">
+          ${getSeverityLabel(f.severity)}
+        </span>
+        <div>
+          <div class="finding-title">${f.title}</div>
+          <div class="finding-type">${f.type}</div>
+          <div class="finding-desc">${f.description}</div>
+          <div class="finding-meta">
+            <span class="source-tag">${f.source}</span>
+            ${f.timestamp}
+          </div>
+          <div class="ai-hint">🤖 Click for AI Analysis</div>
+          <button class="remediate-btn"
+                  onclick="event.stopPropagation(); remediateFinding(${index})">
+            🛡 Remediate
+          </button>
+        </div>
+      </div>
+      `).join("");
+  } catch (e) {
+    document.getElementById("findings").innerHTML =
+      `<div class="loading">Error: ${e.message}</div>`;
+  }
+}
 
-    const res = await fetch(`${API}/explain`, {
+/* Load CloudTrail detections (no changes needed here) */
+async function loadCloudTrailDetections() {
+  try {
+    const res = await fetch(`${API}/cloudtrail-detections`);
+    const data = await res.json();
+    document.getElementById("cloudtrail").innerHTML =
+      (data.findings || []).map(f => `
+      <div class="finding-card">
+        <span class="severity-badge ${
+          f.severity === "Critical" ? "sev-critical"
+          : f.severity === "High"     ? "sev-high"
+          : "sev-medium"
+        }">${f.severity}</span>
+        <div>
+          <div class="finding-title">${f.title}</div>
+          <div class="finding-type">${f.type}</div>
+          <div class="finding-desc">${f.description}</div>
+          <div class="finding-meta">
+            <span class="source-tag">${f.source}</span>
+            ${f.timestamp}
+          </div>
+        </div>
+      </div>
+      `).join("");
+  } catch (e) {
+    document.getElementById("cloudtrail").innerHTML =
+      `<div class="loading">Error: ${e.message}</div>`;
+  }
+}
+
+/* Event handlers (AI analysis and remediation) */
+async function explainFinding(index) {
+  const finding = findingsCache[index];
+  try {
+    const res = await fetch(`${API}/ai/explain`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ finding })
     });
-
     const data = await res.json();
-
     if (data.error) {
       alert("AI Error:\n\n" + data.error);
       return;
     }
-
     const e = data.explanation;
-
     alert(
       "🔍 WHAT HAPPENED\n\n" + e.what_happened +
       "\n\n⚠️ WHY DANGEROUS\n\n" + e.why_dangerous +
@@ -314,176 +326,28 @@ async function explainFinding(index) {
       "\n\n🚨 IMMEDIATE ACTION\n\n" + e.immediate_action +
       "\n\n🛠️ REMEDIATION\n\n" + e.remediation.join("\n")
     );
-
-  } catch (err) {
-
-    alert("AI Request Failed:\n\n" + err.message);
-
+  } catch (e) {
+    alert("AI Error:\n\n" + e.message);
   }
 }
+
 async function remediateFinding(index) {
-
-	  try {
-
-		      const finding = findingsCache[index];
-
-		      const res = await fetch(`${API}/remediate`, {
-			            method: "POST",
-			            headers: {
-					            "Content-Type": "application/json"
-						          },
-							        body: JSON.stringify({ finding })
-								    });
-
-		      const data = await res.json();
-
-		      if (data.error) {
-			            alert("Remediation Error:\n\n" + data.error);
-			            return;
-				        }
-
-					    alert(
-					          "🛡 Remediation Requested\n\n" +
-						        "Status: " + data.status +
-							      "\nAction: " + data.proposed_action
-							          );
-
-								    } catch (err) {
-
-								        alert(
-									      "Remediation Failed:\n\n" +
-									            err.message
-										        );
-
-											  }
-											  }
-
-async function loadCloudTrailDetections() {
-
-  try {
-
-    const res = await fetch(`${API}/cloudtrail-detections`);
-    const data = await res.json();
-
-    document.getElementById("cloudtrail").innerHTML =
-      (data.findings || []).map(f => `
-      <div class="finding-card">
-
-        <span class="severity-badge ${
-          f.severity === "Critical"
-            ? "sev-critical"
-            : f.severity === "High"
-            ? "sev-high"
-            : "sev-medium"
-        }">
-          ${f.severity}
-        </span>
-
-        <div>
-          <div class="finding-title">${f.title}</div>
-          <div class="finding-type">${f.type}</div>
-          <div class="finding-desc">${f.description}</div>
-
-          <div class="finding-meta">
-            <span class="source-tag">${f.source}</span>
-            ${f.timestamp}
-          </div>
-        </div>
-
-      </div>
-      `).join("");
-
-  } catch (e) {
-
-    document.getElementById("cloudtrail").innerHTML =
-      `<div class="loading">Error: ${e.message}</div>`;
-
-  }
+  const finding = findingsCache[index];
+  await fetch(`${API}/findings/remediate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ finding })
+  });
+  loadFindings();
 }
 
-async function loadFindings() {
-
-  try {
-
-    const res = await fetch(`${API}/findings`);
-    const data = await res.json();
-
-    findingsCache = data.findings || [];
-
-    if (data.source === "demo") {
-      document.getElementById("demo-banner").innerHTML =
-        `<div class="demo-banner">
-          ⚠️ Demo mode — showing sample findings. Connect GuardDuty to see real threats.
-        </div>`;
-    }
-
-    document.getElementById("total").textContent =
-      data.total || findingsCache.length;
-
-    document.getElementById("critical").textContent =
-      findingsCache.filter(f => f.severity >= 9).length;
-
-    document.getElementById("high").textContent =
-      findingsCache.filter(f => f.severity >= 7 && f.severity < 9).length;
-
-    document.getElementById("medium").textContent =
-      findingsCache.filter(f => f.severity < 7).length;
-
-    document.getElementById("findings").innerHTML =
-      findingsCache.map((f, index) => `
-      <div class="finding-card" onclick="explainFinding(${index})">
-
-        <span class="severity-badge ${getSeverityClass(f.severity)}">
-          ${getSeverityLabel(f.severity)}
-        </span>
-
-        <div>
-
-          <div class="finding-title">${f.title}</div>
-          <div class="finding-type">${f.type}</div>
-          <div class="finding-desc">${f.description}</div>
-
-          ${f.mitre ? `
-            <div class="mitre-tag">
-              MITRE: ${f.mitre.id} - ${f.mitre.technique}
-            </div>
-          ` : ""}
-
-          <div class="finding-meta">
-            <span class="source-tag">${f.source}</span>
-            ${f.timestamp}
-          </div>
-
-          <div class="ai-hint">
-            🤖 Click for AI Analysis
-          </div>
-<button
-  class="remediate-btn"
-    onclick="event.stopPropagation(); remediateFinding(${index})">
-      🛡 Remediate
-      </button>
-
-        </div>
-
-      </div>
-      `).join("");
-
-  } catch (e) {
-
-    document.getElementById("findings").innerHTML =
-      `<div class="loading">Error: ${e.message}</div>`;
-
-  }
-}
-
+/* Auto-refresh data */
 loadFindings();
 loadCloudTrailDetections();
-
 setInterval(() => {
   loadFindings();
   loadCloudTrailDetections();
 }, 30000);
-
 </script>
 
 </body>
