@@ -958,4 +958,603 @@ body {
 
 <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────────── -->
 <aside class="sidebar">
-  
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">Cloud<span>Sentinel</span></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Monitor</div>
+    <div class="nav-item active">
+      <span class="nav-icon">🏠</span> Overview
+      <span class="nav-badge" id="sidebar-critical-count">—</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🔍</span> Findings
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📋</span> CloudTrail
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🗺</span> Attack Paths
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Posture</div>
+    <div class="nav-item">
+      <span class="nav-icon">☁</span> Assets
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🔑</span> IAM
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🌐</span> Network
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🧾</span> Compliance
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Automate</div>
+    <div class="nav-item">
+      <span class="nav-icon">⚡</span> Remediation
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🔔</span> Alerts
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="env-pill">
+      <div class="live-dot"></div>
+      eu-north-1 · AWS
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─────────────────────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <strong>Overview</strong>
+      <span class="breadcrumb-sep">/</span>
+      Security Findings
+    </div>
+    <div class="topbar-right">
+      <span class="last-scan" id="last-scan-time">Last scan: —</span>
+      <button class="scan-btn" onclick="refreshAll()">
+        ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div id="demo-banner"></div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+
+      <!-- Threat Gauge -->
+      <div class="gauge-card">
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="40"/>
+            <circle class="gauge-fill" id="gauge-arc" cx="50" cy="50" r="40"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-pct" id="gauge-pct">—</div>
+            <div class="gauge-sub">risk</div>
+          </div>
+        </div>
+        <div class="gauge-label">Threat Exposure</div>
+        <div class="gauge-risk-text" id="gauge-risk-label">—</div>
+      </div>
+
+      <!-- Total -->
+      <div class="kpi-card card-total">
+        <div class="kpi-label">Total Findings</div>
+        <div class="kpi-value" id="total">—</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-total"></div></div>
+        <div class="kpi-sub" id="sub-total">All severities</div>
+      </div>
+
+      <!-- Critical -->
+      <div class="kpi-card card-critical">
+        <div class="kpi-label">Critical</div>
+        <div class="kpi-value" id="critical">—</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-critical"></div></div>
+        <div class="kpi-sub" id="sub-critical">Needs immediate action</div>
+      </div>
+
+      <!-- High -->
+      <div class="kpi-card card-high">
+        <div class="kpi-label">High</div>
+        <div class="kpi-value" id="high">—</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-high"></div></div>
+        <div class="kpi-sub" id="sub-high">Remediate within 24h</div>
+      </div>
+
+      <!-- Medium -->
+      <div class="kpi-card card-medium">
+        <div class="kpi-label">Medium / Low</div>
+        <div class="kpi-value" id="medium">—</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-medium"></div></div>
+        <div class="kpi-sub" id="sub-medium">Scheduled remediation</div>
+      </div>
+
+    </div>
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="content-grid">
+
+      <!-- LEFT: Findings Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            Security Findings
+            <span class="panel-count" id="findings-count">—</span>
+          </div>
+          <div class="panel-actions">
+            <button class="filter-btn active" onclick="filterFindings('ALL', this)">All</button>
+            <div class="filter-sep"></div>
+            <button class="filter-btn" onclick="filterFindings('Critical', this)">Critical</button>
+            <button class="filter-btn" onclick="filterFindings('High', this)">High</button>
+            <button class="filter-btn" onclick="filterFindings('Medium', this)">Medium</button>
+          </div>
+        </div>
+        <div id="findings-list">
+          <div class="state-msg">
+            <div class="spinner"></div>
+            <div class="state-title">Loading findings</div>
+            <div class="state-sub">Querying DynamoDB…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CloudTrail Activity -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            CloudTrail Activity
+            <span class="panel-count" id="ct-count">—</span>
+          </div>
+        </div>
+        <div class="activity-feed" id="cloudtrail-list">
+          <div class="state-msg">
+            <div class="spinner"></div>
+            <div class="state-title">Loading detections</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── AI ANALYSIS MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <div class="modal-title" id="modal-title">AI Analysis</div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-loading">
+        <div class="spinner"></div>
+        <div class="state-title">Analysing with Claude…</div>
+        <div class="state-sub">Mapping to MITRE ATT&CK and generating remediation steps</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── CONFIG ────────────────────────────────────────────────────────────────── */
+const API = "https://s1lbua66dj.execute-api.eu-north-1.amazonaws.com";
+
+let findingsCache  = [];
+let allFindings    = [];   // unfiltered source
+let currentFilter  = "ALL";
+
+/* ─── SEVERITY HELPERS ──────────────────────────────────────────────────────── */
+function sevClass(sev) {
+  if (sev === "Critical") return "sev-critical";
+  if (sev === "High")     return "sev-high";
+  if (sev === "Medium")   return "sev-medium";
+  return "sev-low";
+}
+
+function sevLabel(sev) {
+  return (sev || "UNKNOWN").toUpperCase();
+}
+
+/* ─── TIME ───────────────────────────────────────────────────────────────────── */
+function fmtTs(ts) {
+  if (!ts) return "—";
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString("en-IN", {
+      day: "2-digit", month: "short",
+      hour: "2-digit", minute: "2-digit",
+      hour12: false
+    });
+  } catch { return ts; }
+}
+
+function setLastScan() {
+  document.getElementById("last-scan-time").textContent =
+    "Last scan: " + new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
+
+/* ─── GAUGE ──────────────────────────────────────────────────────────────────── */
+function updateGauge(findings) {
+  const total = findings.length;
+  if (total === 0) {
+    document.getElementById("gauge-pct").textContent = "0%";
+    document.getElementById("gauge-risk-label").textContent = "No Data";
+    return;
+  }
+
+  const critical = findings.filter(f => f.severity === "Critical").length;
+  const high     = findings.filter(f => f.severity === "High").length;
+  const score    = Math.round(((critical * 1.0 + high * 0.6) / total) * 100);
+  const pct      = Math.min(score, 100);
+
+  const circumference = 251.2;
+  const offset = circumference - (circumference * pct / 100);
+
+  const arc = document.getElementById("gauge-arc");
+  arc.style.strokeDashoffset = offset;
+
+  let color, label;
+  if (pct >= 70)      { color = "var(--critical)"; label = "Critical Risk"; }
+  else if (pct >= 40) { color = "var(--high)";     label = "High Risk"; }
+  else if (pct >= 15) { color = "var(--medium)";   label = "Medium Risk"; }
+  else                { color = "var(--low)";       label = "Low Risk"; }
+
+  arc.style.stroke = color;
+  document.getElementById("gauge-pct").textContent = pct + "%";
+  document.getElementById("gauge-risk-label").style.color = color;
+  document.getElementById("gauge-risk-label").textContent = label;
+}
+
+/* ─── KPI COUNTERS ───────────────────────────────────────────────────────────── */
+function updateKPIs(findings) {
+  const total    = findings.length;
+  const critical = findings.filter(f => f.severity === "Critical").length;
+  const high     = findings.filter(f => f.severity === "High").length;
+  const medLow   = findings.filter(f => f.severity === "Medium" || f.severity === "Low").length;
+
+  document.getElementById("total").textContent    = total;
+  document.getElementById("critical").textContent = critical;
+  document.getElementById("high").textContent     = high;
+  document.getElementById("medium").textContent   = medLow;
+
+  document.getElementById("sidebar-critical-count").textContent = critical || "—";
+
+  // Animate progress bars
+  setTimeout(() => {
+    document.getElementById("bar-total").style.width    = "100%";
+    document.getElementById("bar-critical").style.width = total ? (critical / total * 100) + "%" : "0%";
+    document.getElementById("bar-high").style.width     = total ? (high     / total * 100) + "%" : "0%";
+    document.getElementById("bar-medium").style.width   = total ? (medLow   / total * 100) + "%" : "0%";
+  }, 150);
+
+  updateGauge(findings);
+}
+
+/* ─── FILTER ─────────────────────────────────────────────────────────────────── */
+function filterFindings(sev, btn) {
+  currentFilter = sev;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  const filtered = sev === "ALL"
+    ? allFindings
+    : allFindings.filter(f => f.severity === sev);
+
+  findingsCache = filtered;
+  renderFindings(filtered);
+}
+
+/* ─── RENDER FINDINGS ────────────────────────────────────────────────────────── */
+function renderFindings(findings) {
+  const container = document.getElementById("findings-list");
+  document.getElementById("findings-count").textContent = findings.length;
+
+  if (!findings.length) {
+    container.innerHTML = `
+      <div class="state-msg">
+        <div class="state-icon">✅</div>
+        <div class="state-title">No findings</div>
+        <div class="state-sub">Nothing matches this filter</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = findings.map((f, i) => `
+    <div class="finding-row ${sevClass(f.severity)}" onclick="openModal(${i})">
+      <span class="sev-badge ${sevClass(f.severity)}">${sevLabel(f.severity)}</span>
+
+      <div class="finding-body">
+        <div class="finding-title">${escHtml(f.title)}</div>
+        <div class="finding-type">${escHtml(f.type || "")}</div>
+        <div class="finding-desc">${escHtml(f.description || "")}</div>
+
+        <div class="finding-footer">
+          <span class="source-chip">${escHtml(f.source || "")}</span>
+          <span class="ts-chip">${fmtTs(f.timestamp)}</span>
+          ${f.mitre ? `<span class="mitre-chip">${escHtml(f.mitre.id)} · ${escHtml(f.mitre.technique)}</span>` : ""}
+          <span class="status-chip">
+            <span class="status-dot"></span>
+            ${escHtml(f.status || "OPEN")}
+          </span>
+        </div>
+      </div>
+
+      <div class="finding-actions">
+        <button class="action-btn" onclick="event.stopPropagation(); openModal(${i})">
+          🤖 Analyse
+        </button>
+        <button class="action-btn remediate" onclick="event.stopPropagation(); remediateFinding(${i})">
+          🛡 Remediate
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ─── LOAD FINDINGS ──────────────────────────────────────────────────────────── */
+async function loadFindings() {
+  try {
+    const res  = await fetch(`${API}/findings`);
+    const data = await res.json();
+
+    allFindings    = data.findings || [];
+    findingsCache  = currentFilter === "ALL"
+      ? allFindings
+      : allFindings.filter(f => f.severity === currentFilter);
+
+    if (data.source === "demo") {
+      document.getElementById("demo-banner").innerHTML = `
+        <div class="demo-banner">
+          ⚠️ Demo mode — showing sample findings. Connect GuardDuty to see real threats.
+        </div>`;
+    }
+
+    updateKPIs(allFindings);
+    renderFindings(findingsCache);
+    setLastScan();
+
+  } catch (e) {
+    document.getElementById("findings-list").innerHTML = `
+      <div class="state-msg">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Failed to load findings</div>
+        <div class="state-sub">${escHtml(e.message)}</div>
+      </div>`;
+  }
+}
+
+/* ─── LOAD CLOUDTRAIL ────────────────────────────────────────────────────────── */
+async function loadCloudTrailDetections() {
+  try {
+    const res  = await fetch(`${API}/cloudtrail-detections`);
+    const data = await res.json();
+    const items = data.findings || [];
+
+    document.getElementById("ct-count").textContent = items.length;
+
+    if (!items.length) {
+      document.getElementById("cloudtrail-list").innerHTML = `
+        <div class="state-msg">
+          <div class="state-icon">📭</div>
+          <div class="state-title">No detections</div>
+          <div class="state-sub">Listening for CloudTrail events…</div>
+        </div>`;
+      return;
+    }
+
+    document.getElementById("cloudtrail-list").innerHTML = items.map(f => `
+      <div class="activity-item">
+        <div class="activity-dot-wrap">
+          <div class="activity-dot" style="background:${sevColor(f.severity)}"></div>
+          <div class="activity-line"></div>
+        </div>
+        <div class="activity-body">
+          <div class="activity-title">${escHtml(f.title)}</div>
+          <div class="activity-meta">
+            <span class="activity-source">${escHtml(f.source || "")}</span>
+            · ${fmtTs(f.timestamp)}
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+  } catch (e) {
+    document.getElementById("cloudtrail-list").innerHTML = `
+      <div class="state-msg">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Failed to load detections</div>
+        <div class="state-sub">${escHtml(e.message)}</div>
+      </div>`;
+  }
+}
+
+function sevColor(sev) {
+  if (sev === "Critical") return "var(--critical)";
+  if (sev === "High")     return "var(--high)";
+  if (sev === "Medium")   return "var(--medium)";
+  return "var(--low)";
+}
+
+/* ─── AI MODAL ───────────────────────────────────────────────────────────────── */
+let activeModalIndex = null;
+
+function openModal(index) {
+  activeModalIndex = index;
+  const f = findingsCache[index];
+  if (!f) return;
+
+  document.getElementById("modal-title").textContent   = f.title;
+  document.getElementById("modal-subtitle").textContent = f.type || "";
+  document.getElementById("modal-body").innerHTML = `
+    <div class="modal-loading">
+      <div class="spinner"></div>
+      <div class="state-title">Analysing with Claude…</div>
+      <div class="state-sub">Mapping to MITRE ATT&CK and generating remediation steps</div>
+    </div>`;
+
+  document.getElementById("modal-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  explainFinding(index);
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModalDirect();
+});
+
+async function explainFinding(index) {
+  try {
+    const finding = findingsCache[index];
+    const res     = await fetch(`${API}/explain`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ finding })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      document.getElementById("modal-body").innerHTML = `
+        <div class="modal-error">⚠️ ${escHtml(data.error)}</div>`;
+      return;
+    }
+
+    const e = data.explanation;
+
+    document.getElementById("modal-body").innerHTML = `
+      <div class="modal-section">
+        <div class="modal-section-label">What Happened</div>
+        <div class="modal-section-text">${escHtml(e.what_happened)}</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Why It's Dangerous</div>
+        <div class="modal-section-text">${escHtml(e.why_dangerous)}</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Attacker Goal</div>
+        <div class="modal-section-text">${escHtml(e.attacker_goal)}</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Immediate Action</div>
+        <div class="modal-section-text">${escHtml(e.immediate_action)}</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Remediation Steps</div>
+        <ul class="modal-remediation-list">
+          ${(e.remediation || []).map(r => `<li>${escHtml(r)}</li>`).join("")}
+        </ul>
+      </div>`;
+
+  } catch (err) {
+    document.getElementById("modal-body").innerHTML = `
+      <div class="modal-error">⚠️ Request failed: ${escHtml(err.message)}</div>`;
+  }
+}
+
+/* ─── REMEDIATE ──────────────────────────────────────────────────────────────── */
+async function remediateFinding(index) {
+  const btn = event.currentTarget;
+  const origText = btn.innerHTML;
+  btn.innerHTML = "⏳ Working…";
+  btn.disabled = true;
+
+  try {
+    const finding = findingsCache[index];
+    const res     = await fetch(`${API}/remediate`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ finding })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      btn.innerHTML = "❌ Failed";
+      setTimeout(() => { btn.innerHTML = origText; btn.disabled = false; }, 3000);
+      return;
+    }
+
+    btn.innerHTML = "✅ Requested";
+    btn.style.borderColor = "var(--low)";
+    btn.style.color = "var(--low)";
+    setTimeout(() => {
+      btn.innerHTML = origText;
+      btn.style.borderColor = "";
+      btn.style.color = "";
+      btn.disabled = false;
+    }, 4000);
+
+  } catch (err) {
+    btn.innerHTML = "❌ Failed";
+    setTimeout(() => { btn.innerHTML = origText; btn.disabled = false; }, 3000);
+  }
+}
+
+/* ─── REFRESH ────────────────────────────────────────────────────────────────── */
+function refreshAll() {
+  document.getElementById("findings-list").innerHTML = `
+    <div class="state-msg">
+      <div class="spinner"></div>
+      <div class="state-title">Refreshing…</div>
+    </div>`;
+  loadFindings();
+  loadCloudTrailDetections();
+}
+
+/* ─── XSS GUARD ──────────────────────────────────────────────────────────────── */
+function escHtml(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────────────────── */
+loadFindings();
+loadCloudTrailDetections();
+
+setInterval(() => {
+  // Only auto-refresh if modal is not open
+  if (!document.getElementById("modal-overlay").classList.contains("open")) {
+    loadFindings();
+    loadCloudTrailDetections();
+  }
+}, 30000);
+</script>
+
+</body>
+</html>
